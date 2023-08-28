@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% include "head.html" %}
+  </head>
+  <body>
+    {% include "navbar.html" %}
+
+    <section class="py-1">
+      <div class="row mt-5">
+        <div class="col-lg-8 offset-lg-2">
+          <h3>Personnel Data</h3>
+          <hr />
+          <div class="row">
+            <div class="col-lg-4">
+              <a href="/addprsn" type="button" class="btn btn-success btn-lg"
+                ><b>Register Voter</b></a
+              >
+            </div>
+            <div class="col-lg-2"></div>
+            <div class="col-lg-4">
+              <a href="/fr_page" type="button" class="btn btn-info btn-lg"
+                ><b>Voter Authentication</b></a
+              >
+            </div>
+          </div>
+
+          <br />
+          <table class="table" style="width: 80%">
+            <thead>
+              <tr>
+                <th>Voter</th>
+                <th>Name</th>
+                <th>Added</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in data %}
+              <tr>
+                <td>{{item[0]}}</td>
+                <td>{{item[1]}}</td>
+                <td>{{item[2]}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
