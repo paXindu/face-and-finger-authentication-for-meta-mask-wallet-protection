@@ -3,6 +3,7 @@ import mysql.connector
 from facedata_generate import facedata_generate
 from face_recognition import face_recognition
 from face_classifier import face_classifier
+from printId import print_nic
 
 app = Flask(__name__)
 
@@ -48,29 +49,40 @@ def vfdataset_page(prs):
 def vidfeed_dataset(nbr):
     return Response(facedata_generate(nbr), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/camera_page')
+def camera_page():
+    return render_template('camera_page.html')
+
 @app.route('/video_feed')
 def video_feed():
-    
     return Response(face_recognition(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/fr_page')
-def fr_page():
-    mycursor.execute("SELECT a.auth_id, a.auth_voter, b.voter_name, a.auth_added "
-                     "FROM voters_auth a "
-                     "LEFT JOIN voters b ON a.auth_voter = b.voter_nic "
-                     "WHERE a.auth_date = CURDATE() "
-                     "ORDER BY 1 DESC")
-    data = mycursor.fetchall()
-    return render_template('fr_page.html', data=data)
 
-@app.route('/countTodayScan')
-def countTodayScan():
-    mycursor.execute("SELECT COUNT(*) "
-                     "FROM voters_auth "
-                     "WHERE auth_date = CURDATE()")
-    row = mycursor.fetchone()
-    rowcount = row[0]
-    return jsonify({'rowcount': rowcount})
+@app.route('/get_authed_user')
+def authed_user():
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="root",
+    database="voters"
+    )
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT a.auth_id, a.auth_voter, b.voter_name, a.auth_added "
+                 "FROM voters_auth a "
+                 "LEFT JOIN voters b ON a.auth_voter = b.voter_nic "
+                 "WHERE a.auth_date = CURDATE() "
+                 "ORDER BY a.auth_added DESC "
+                 "LIMIT 1")
+    data = mycursor.fetchall()
+    
+    return jsonify(response=data)
+
+
+@app.route('/login_history')
+def login_history():
+    return render_template('login_history.html')
+
 
 @app.route('/loadData', methods=['GET', 'POST'])
 def loadData():

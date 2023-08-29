@@ -8,6 +8,7 @@ import time
 from datetime import date
 import json
 
+
 from printId import print_nic 
  
 app = Flask(__name__)
@@ -15,6 +16,7 @@ app = Flask(__name__)
 cnt = 0
 pause_cnt = 0
 justscanned = False
+
  
 mydb = mysql.connector.connect(
     host="localhost",
@@ -34,6 +36,7 @@ def face_recognition():  # generate frame by frame from camera
  
         global justscanned
         global pause_cnt
+        global voter_nic
         
  
         pause_cnt += 1
@@ -78,6 +81,7 @@ def face_recognition():  # generate frame by frame from camera
                     pause_cnt = 0
 
                     print_nic(voter_nic)
+                        
 
                     cap.release()
                     cv2.destroyAllWindows()
@@ -116,8 +120,14 @@ def face_recognition():  # generate frame by frame from camera
         frame = cv2.imencode('.jpg', img)[1].tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+        
+        
+        
  
         key = cv2.waitKey(1)
         if key == 27:
             break
+
+        
+        
  
