@@ -1,87 +1,119 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <title>MetaMask Connection Page</title>
+    <title>My Wallet Connection Page</title>
+    <!-- Add Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
   </head>
   <body>
-    <center>
-      <h1>Connect Your MetaMask Wallet Here!</h1>
-      <button id="connectWallet" onclick="">Connect Wallet</button>
-      <button id="getBalance" onclick="checkBalance()">
-        Get Balance of Wallet
-      </button>
+    <div class="container">
+      <div class="text-center">
+        <h1>Connect Your Wallet Here!</h1>
+        <button id="connectButton" class="btn btn-primary" onclick="">
+          Connect Wallet
+        </button>
+        <button
+          id="balanceButton"
+          class="btn btn-success"
+          onclick="checkWalletBalance()"
+        >
+          Get Wallet Balance
+        </button>
 
-      <p id="walletAddress"></p>
-      <p id="walletBalance"></p>
+        <p id="walletAddressText"></p>
+        <p id="walletBalanceText"></p>
 
-      <script type="text/javascript">
-        window.userWalletAddress = null;
-        const connectWallet = document.getElementById("connectWallet");
-        const walletAddress = document.getElementById("walletAddress");
-        const walletBalance = document.getElementById("walletBalance");
+        <script type="text/javascript">
+          window.currentUserWallet = null;
+          const connectButton = document.getElementById("connectButton");
+          const walletAddressText =
+            document.getElementById("walletAddressText");
+          const walletBalanceText =
+            document.getElementById("walletBalanceText");
 
-        function checkInstalled() {
-          if (typeof window.ethereum == "undefined") {
-            connectWallet.innerText =
-              "MetaMask isnt installed, please install it";
-            connectWallet.classList.remove();
-            connectWallet.classList.add();
-            return false;
+          function checkExtensionInstalled() {
+            if (typeof window.ethereum == "undefined") {
+              connectButton.innerText =
+                "Wallet extension is not installed. Please install it.";
+              connectButton.classList.remove();
+              connectButton.classList.add();
+              return false;
+            }
+            connectButton.addEventListener("click", connectWithWalletExtension);
           }
-          connectWallet.addEventListener("click", connectWalletwithMetaMask);
-        }
 
-        async function connectWalletwithMetaMask() {
-          const accounts = await window.ethereum
-            .request({ method: "eth_requestAccounts" })
-            .catch((e) => {
-              console.error(e.message);
+          async function connectWithWalletExtension() {
+            const accounts = await window.ethereum
+              .request({ method: "eth_requestAccounts" })
+              .catch((error) => {
+                console.error(error.message);
+                return;
+              });
+
+            if (!accounts) {
               return;
-            });
+            }
 
-          if (!accounts) {
-            return;
+            window.currentUserWallet = accounts[0];
+            walletAddressText.innerText = window.currentUserWallet;
+
+            connectButton.innerText = "Sign Out";
+            connectButton.removeEventListener(
+              "click",
+              connectWithWalletExtension
+            );
+            setTimeout(() => {
+              connectButton.addEventListener("click", signOutOfWalletExtension);
+            }, 200);
           }
 
-          window.userWalletAddress = accounts[0];
-          walletAddress.innerText = window.userWalletAddress;
+          function signOutOfWalletExtension() {
+            window.currentUserWallet = null;
+            walletAddressText.innerText = "";
+            connectButton.innerText = "Connect Wallet";
 
-          connectWallet.innerText = "Sign Out";
-          connectWallet.removeEventListener("click", connectWalletwithMetaMask);
-          setTimeout(() => {
-            connectWallet.addEventListener("click", signOutOfMetaMask);
-          }, 200);
-        }
+            connectButton.removeEventListener(
+              "click",
+              signOutOfWalletExtension
+            );
+            setTimeout(() => {
+              connectButton.addEventListener(
+                "click",
+                connectWithWalletExtension
+              );
+            }, 200);
+          }
 
-        function signOutOfMetaMask() {
-          window.userwalletAddress = null;
-          walletAddress.innerText = "";
-          connectWallet.innerText = "Connect Wallet";
+          async function checkWalletBalance() {
+            let balance = await window.ethereum
+              .request({
+                method: "eth_getBalance",
+                params: [window.currentUserWallet, "latest"],
+              })
+              .catch((error) => {
+                console.log(error);
+              });
 
-          connectWallet.removeEventListener("click", signOutOfMetaMask);
-          setTimeout(() => {
-            connectWallet.addEventListener("click", connectWalletwithMetaMask);
-          }, 200);
-        }
+            console.log(parseFloat(balance / Math.pow(10, 18)));
 
-        async function checkBalance() {
-          let balance = await window.ethereum
-            .request({
-              method: "eth_getBalance",
-              params: [window.userWalletAddress, "latest"],
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+            walletBalanceText.innerText = parseFloat(
+              balance / Math.pow(10, 18)
+            );
+          }
 
-          console.log(parseFloat(balance / Math.pow(10, 18)));
+          window.addEventListener("DOMContentLoaded", () => {
+            checkExtensionInstalled();
+          });
+        </script>
+      </div>
+    </div>
 
-          walletBalance.innerText = parseFloat(balance / Math.pow(10, 18));
-        }
-
-        window.addEventListener("DOMContentLoaded", () => {
-          checkInstalled();
-        });
-      </script>
-    </center>
+    <!-- Add Bootstrap JS and jQuery scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
